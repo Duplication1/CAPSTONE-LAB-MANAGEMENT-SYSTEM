@@ -7,17 +7,19 @@ require_once '../controller/login_controller.php';
 
 $controller = new LoginController();
 
-// Check if user is already logged in
-$controller->checkExistingLogin();
-
-// Handle login form submission
+// Handle login form submission first
 $loginResult = $controller->handleLogin();
 
-// Handle redirect
+// Handle redirect immediately after successful login
 if ($loginResult && $loginResult['success']) {
+    // Add small delay to ensure session is written
+    usleep(100000); // 0.1 second
     header('Location: ' . $loginResult['redirect']);
     exit();
 }
+
+// Check if user is already logged in (for page loads without form submission)
+$controller->checkExistingLogin();
 ?>
 
 <!DOCTYPE html>

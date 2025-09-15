@@ -189,7 +189,9 @@ class UserAuth {
      * @param array $user
      */
     public function createSession($user) {
-        session_start();
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['username'] = $user['username'] ?? $user['student_id'];
         $_SESSION['user_type'] = $user['user_type'];
@@ -202,7 +204,9 @@ class UserAuth {
      * Destroy user session
      */
     public function destroySession() {
-        session_start();
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
         session_destroy();
     }
 
@@ -211,7 +215,9 @@ class UserAuth {
      * @return bool
      */
     public function isLoggedIn() {
-        session_start();
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
         return isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true;
     }
 
@@ -220,7 +226,9 @@ class UserAuth {
      * @return array|null
      */
     public function getCurrentUser() {
-        session_start();
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
         if ($this->isLoggedIn()) {
             return [
                 'id' => $_SESSION['user_id'],
