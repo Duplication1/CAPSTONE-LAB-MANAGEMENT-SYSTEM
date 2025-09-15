@@ -26,40 +26,28 @@ $admin_id = $_SESSION['user_id'];
     <link href="../../css/output.css" rel="stylesheet">
 </head>
 <body class="bg-gray-50">
-    <!-- Navigation Bar -->
-    <nav class="bg-white shadow-lg">
-        <div class="max-w-7xl mx-auto px-4">
-            <div class="flex justify-between h-16">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <h1 class="text-xl font-bold text-gray-800">Lab Management System</h1>
-                    </div>
-                    <div class="ml-6">
-                        <span class="text-sm text-gray-600">Administrator Panel</span>
+    <div class="flex dashboard-layout">
+        <!-- Sidebar -->
+        <?php include '../components/sidebar.php'; ?>
+
+        <!-- Main content area -->
+        <div class="flex flex-col flex-1 main-content-area">
+            <!-- Header -->
+            <?php include '../components/header.php'; ?>
+
+            <!-- Main content -->
+            <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-6">
+
+                <!-- Welcome Section -->
+                <div class="bg-white overflow-hidden shadow rounded-lg mb-6">
+                    <div class="px-4 py-5 sm:p-6">
+                        <h2 class="text-lg font-medium text-gray-900 mb-2">Administrator Control Panel</h2>
+                        <p class="text-sm text-gray-600">Manage the entire lab management system, users, and administrative functions.</p>
                     </div>
                 </div>
-                <div class="flex items-center space-x-4">
-                    <span class="text-sm text-gray-700">Welcome, <?php echo htmlspecialchars($admin_name); ?></span>
-                    <a href="../index.php?action=logout" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200">
-                        Logout
-                    </a>
-                </div>
-            </div>
-        </div>
-    </nav>
 
-    <!-- Main Content -->
-    <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <!-- Welcome Section -->
-        <div class="bg-white overflow-hidden shadow rounded-lg mb-6">
-            <div class="px-4 py-5 sm:p-6">
-                <h2 class="text-lg font-medium text-gray-900 mb-2">Administrator Control Panel</h2>
-                <p class="text-sm text-gray-600">Manage the entire lab management system, users, and administrative functions.</p>
-            </div>
-        </div>
-
-        <!-- System Statistics -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                <!-- System Statistics -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
             <!-- Total Users Card -->
             <div class="bg-white overflow-hidden shadow rounded-lg">
                 <div class="p-5">
@@ -135,82 +123,218 @@ $admin_id = $_SESSION['user_id'];
                     </div>
                 </div>
             </div>
+
+                <!-- Administration Tools -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                    <!-- User Management -->
+                    <div class="bg-white shadow rounded-lg">
+                        <div class="px-4 py-5 sm:p-6">
+                            <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">User Management</h3>
+                            <div class="space-y-3">
+                                <button class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200">
+                                    Manage Students
+                                </button>
+                                <button class="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200">
+                                    Manage Professors
+                                </button>
+                                <button class="w-full bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200">
+                                    Manage IT Staff
+                                </button>
+                                <button class="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200">
+                                    User Permissions
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Lab Management -->
+                    <div class="bg-white shadow rounded-lg">
+                        <div class="px-4 py-5 sm:p-6">
+                            <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Lab Management</h3>
+                            <div class="space-y-3">
+                                <button class="w-full bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200">
+                                    Lab Rooms
+                                </button>
+                                <button class="w-full bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200">
+                                    Equipment Inventory
+                                </button>
+                                <button class="w-full bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200">
+                                    Scheduling
+                                </button>
+                                <button class="w-full bg-pink-600 hover:bg-pink-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200">
+                                    Maintenance Logs
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- System Administration -->
+                    <div class="bg-white shadow rounded-lg">
+                        <div class="px-4 py-5 sm:p-6">
+                            <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">System Administration</h3>
+                            <div class="space-y-3">
+                                <button class="w-full bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200">
+                                    System Settings
+                                </button>
+                                <button class="w-full bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200">
+                                    Database Backup
+                                </button>
+                                <button class="w-full bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200">
+                                    System Logs
+                                </button>
+                                <button class="w-full bg-slate-600 hover:bg-slate-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200">
+                                    Generate Reports
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity & System Logs -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Recent Activity -->
+                    <div class="bg-white shadow rounded-lg">
+                        <div class="px-4 py-5 sm:p-6">
+                            <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Recent System Activity</h3>
+                            <div class="flow-root">
+                                <ul class="-mb-8">
+                                    <li>
+                                        <div class="relative pb-8">
+                                            <div class="relative flex space-x-3">
+                                                <div>
+                                                    <span class="h-8 w-8 rounded-full bg-green-500 flex items-center justify-center ring-8 ring-white">
+                                                        <svg class="h-5 w-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                                        </svg>
+                                                    </span>
+                                                </div>
+                                                <div class="min-w-0 flex-1 pt-1.5 flex justify-between space-x-4">
+                                                    <div>
+                                                        <p class="text-sm text-gray-500">System administrator logged in</p>
+                                                    </div>
+                                                    <div class="text-right text-sm whitespace-nowrap text-gray-500">
+                                                        <time datetime="2025-09-15">Today</time>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Stats -->
+                    <div class="bg-white shadow rounded-lg">
+                        <div class="px-4 py-5 sm:p-6">
+                            <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Quick Statistics</h3>
+                            <dl class="grid grid-cols-1 gap-5">
+                                <div class="flex justify-between">
+                                    <dt class="text-sm font-medium text-gray-500">Active Sessions</dt>
+                                    <dd class="text-sm text-gray-900">1</dd>
+                                </div>
+                                <div class="flex justify-between">
+                                    <dt class="text-sm font-medium text-gray-500">Database Size</dt>
+                                    <dd class="text-sm text-gray-900">-- MB</dd>
+                                </div>
+                                <div class="flex justify-between">
+                                    <dt class="text-sm font-medium text-gray-500">Last Backup</dt>
+                                    <dd class="text-sm text-gray-900">--</dd>
+                                </div>
+                                <div class="flex justify-between">
+                                    <dt class="text-sm font-medium text-gray-500">System Uptime</dt>
+                                    <dd class="text-sm text-gray-900">--</dd>
+                                </div>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            </main>
         </div>
+    </div>
 
-        <!-- Administration Tools -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-            <!-- User Management -->
-            <div class="bg-white shadow rounded-lg">
-                <div class="px-4 py-5 sm:p-6">
-                    <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">User Management</h3>
-                    <div class="space-y-3">
-                        <button class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200">
-                            Manage Students
-                        </button>
-                        <button class="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200">
-                            Manage Professors
-                        </button>
-                        <button class="w-full bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200">
-                            Manage IT Staff
-                        </button>
-                        <button class="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200">
-                            User Permissions
-                        </button>
-                    </div>
-                </div>
-            </div>
+    <!-- JavaScript for sidebar toggle -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebar = document.getElementById('sidebar');
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const sidebarClose = document.getElementById('sidebarClose');
+            const sidebarOverlay = document.getElementById('sidebarOverlay');
+            const mainContent = document.querySelector('.main-content-area');
+            
+            let sidebarOpen = false;
 
-            <!-- Lab Management -->
-            <div class="bg-white shadow rounded-lg">
-                <div class="px-4 py-5 sm:p-6">
-                    <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Lab Management</h3>
-                    <div class="space-y-3">
-                        <button class="w-full bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200">
-                            Lab Rooms
-                        </button>
-                        <button class="w-full bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200">
-                            Equipment Inventory
-                        </button>
-                        <button class="w-full bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200">
-                            Scheduling
-                        </button>
-                        <button class="w-full bg-pink-600 hover:bg-pink-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200">
-                            Maintenance Logs
-                        </button>
-                    </div>
-                </div>
-            </div>
+            function initializeSidebar() {
+                if (window.innerWidth >= 1024) {
+                    // Desktop: sidebar open by default
+                    sidebar.classList.remove('-translate-x-full');
+                    sidebarOverlay.classList.add('hidden');
+                    mainContent.classList.add('sidebar-open');
+                    mainContent.classList.remove('sidebar-closed');
+                    sidebarOpen = true;
+                } else {
+                    // Mobile: sidebar closed by default
+                    sidebar.classList.add('-translate-x-full');
+                    sidebarOverlay.classList.add('hidden');
+                    mainContent.classList.remove('sidebar-open', 'sidebar-closed');
+                    sidebarOpen = false;
+                }
+            }
 
-            <!-- System Administration -->
-            <div class="bg-white shadow rounded-lg">
-                <div class="px-4 py-5 sm:p-6">
-                    <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">System Administration</h3>
-                    <div class="space-y-3">
-                        <button class="w-full bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200">
-                            System Settings
-                        </button>
-                        <button class="w-full bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200">
-                            Database Backup
-                        </button>
-                        <button class="w-full bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200">
-                            System Logs
-                        </button>
-                        <button class="w-full bg-slate-600 hover:bg-slate-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200">
-                            Generate Reports
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
+            function toggleSidebar() {
+                if (window.innerWidth >= 1024) {
+                    // Desktop toggle
+                    if (sidebarOpen) {
+                        sidebar.classList.add('-translate-x-full');
+                        mainContent.classList.remove('sidebar-open');
+                        mainContent.classList.add('sidebar-closed');
+                        sidebarOpen = false;
+                    } else {
+                        sidebar.classList.remove('-translate-x-full');
+                        mainContent.classList.remove('sidebar-closed');
+                        mainContent.classList.add('sidebar-open');
+                        sidebarOpen = true;
+                    }
+                    sidebarOverlay.classList.add('hidden');
+                } else {
+                    // Mobile toggle
+                    sidebar.classList.toggle('-translate-x-full');
+                    sidebarOverlay.classList.toggle('hidden');
+                }
+            }
 
-        <!-- Recent Activity & System Logs -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <!-- Recent Activity -->
-            <div class="bg-white shadow rounded-lg">
-                <div class="px-4 py-5 sm:p-6">
-                    <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Recent System Activity</h3>
-                    <div class="flow-root">
-                        <ul class="-mb-8">
+            function closeSidebar() {
+                sidebar.classList.add('-translate-x-full');
+                sidebarOverlay.classList.add('hidden');
+                if (window.innerWidth >= 1024) {
+                    mainContent.classList.remove('sidebar-open');
+                    mainContent.classList.add('sidebar-closed');
+                    sidebarOpen = false;
+                }
+            }
+
+            // Initialize sidebar state
+            initializeSidebar();
+
+            sidebarToggle?.addEventListener('click', toggleSidebar);
+            sidebarClose?.addEventListener('click', closeSidebar);
+            sidebarOverlay?.addEventListener('click', closeSidebar);
+
+            // Close sidebar when clicking outside on mobile
+            document.addEventListener('click', function(event) {
+                if (window.innerWidth < 1024) { // lg breakpoint
+                    if (!sidebar.contains(event.target) && !sidebarToggle?.contains(event.target)) {
+                        closeSidebar();
+                    }
+                }
+            });
+
+            // Handle window resize
+            window.addEventListener('resize', function() {
+                initializeSidebar();
+            });
+        });
+    </script>
                             <li>
                                 <div class="relative pb-8">
                                     <div class="relative flex space-x-3">

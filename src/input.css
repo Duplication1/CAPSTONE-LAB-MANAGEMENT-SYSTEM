@@ -22,3 +22,33 @@
 .nav-link.active {
   @apply text-blue-600 bg-blue-50;
 }
+
+/* Layout fixes for sidebar and header */
+.dashboard-layout {
+  height: 100vh;
+  overflow: hidden;
+}
+
+.sidebar-container {
+  min-height: 100vh;
+}
+
+.main-content-area {
+  min-height: 100vh;
+  transition: margin-left 0.3s ease-in-out;
+}
+
+@media (min-width: 1024px) {
+  .sidebar-container {
+    width: 16rem; /* w-64 equivalent */
+    flex-shrink: 0;
+  }
+  
+  .main-content-area.sidebar-open {
+    margin-left: 0;
+  }
+  
+  .main-content-area.sidebar-closed {
+    margin-left: -16rem; /* Negative w-64 */
+  }
+}
