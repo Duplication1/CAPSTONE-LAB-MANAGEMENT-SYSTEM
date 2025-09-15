@@ -27,6 +27,17 @@ if ($loginResult && $loginResult['success']) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Lab Management System</title>
     <link href="../css/output.css" rel="stylesheet">
+    <style>
+        .hidden {
+            display: none !important;
+        }
+        .tab-content {
+            display: block;
+        }
+        .tab-content.hidden {
+            display: none !important;
+        }
+    </style>
 </head>
 <body class="login-container">
     <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
@@ -46,108 +57,141 @@ if ($loginResult && $loginResult['success']) {
                 </p>
             </div>
 
-            <!-- Login Form -->
+            <!-- Tab-based Login Interface -->
             <div class="bg-white rounded-lg shadow-2xl p-8">
-                <?php if ($loginResult && !$loginResult['success']): ?>
-                    <div class="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-                        <div class="flex">
-                            <div class="flex-shrink-0">
-                                <svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
-                                </svg>
-                            </div>
-                            <div class="ml-3">
-                                <p class="text-sm font-medium"><?php echo htmlspecialchars($loginResult['message']); ?></p>
+                <!-- Tab Navigation -->
+                <div class="flex mb-6 bg-gray-100 rounded-lg p-1">
+                    <button 
+                        id="studentTab"
+                        onclick="switchTab('student')" 
+                        class="flex-1 py-2 px-4 text-sm font-medium text-center rounded-md transition-all duration-200 bg-blue-600 text-white shadow-sm"
+                    >
+                        Student Login
+                    </button>
+                    <button 
+                        id="staffTab"
+                        onclick="switchTab('staff')" 
+                        class="flex-1 py-2 px-4 text-sm font-medium text-center rounded-md transition-all duration-200 text-gray-600 hover:text-gray-800"
+                    >
+                        Staff/Faculty Login
+                    </button>
+                </div>
+
+                <!-- Student Login Content -->
+                <div id="studentContent" class="tab-content">
+                    <?php if ($loginResult && !$loginResult['success'] && isset($_POST['student_number'])): ?>
+                        <div class="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                            <div class="flex">
+                                <div class="flex-shrink-0">
+                                    <svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                                    </svg>
+                                </div>
+                                <div class="ml-3">
+                                    <p class="text-sm font-medium"><?php echo htmlspecialchars($loginResult['message']); ?></p>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                <?php endif; ?>
+                    <?php endif; ?>
 
-                <form method="POST" action="" class="space-y-6">
-                    <!-- User Type Selection -->
-                    <div>
-                        <label for="user_type" class="block text-sm font-medium text-gray-700 mb-2">
-                            User Type
-                        </label>
-                        <select id="user_type" name="user_type" required class="form-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                            <option value="">Select User Type</option>
-                            <option value="student" <?php echo (isset($_POST['user_type']) && $_POST['user_type'] === 'student') ? 'selected' : ''; ?>>Student</option>
-                            <option value="professor" <?php echo (isset($_POST['user_type']) && $_POST['user_type'] === 'professor') ? 'selected' : ''; ?>>Professor</option>
-                            <option value="itstaff" <?php echo (isset($_POST['user_type']) && $_POST['user_type'] === 'itstaff') ? 'selected' : ''; ?>>IT Staff</option>
-                            <option value="admin" <?php echo (isset($_POST['user_type']) && $_POST['user_type'] === 'admin') ? 'selected' : ''; ?>>Administrator</option>
-                        </select>
-                    </div>
-
-                    <!-- Username -->
-                    <div>
-                        <label for="username" class="block text-sm font-medium text-gray-700 mb-2">
-                            Username
-                        </label>
-                        <input 
-                            type="text" 
-                            id="username" 
-                            name="username" 
-                            required 
-                            value="<?php echo htmlspecialchars($_POST['username'] ?? ''); ?>"
-                            class="form-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" 
-                            placeholder="Enter your username"
-                        >
-                    </div>
-
-                    <!-- Password -->
-                    <div>
-                        <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
-                            Password
-                        </label>
-                        <input 
-                            type="password" 
-                            id="password" 
-                            name="password" 
-                            required 
-                            class="form-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" 
-                            placeholder="Enter your password"
-                        >
-                    </div>
-
-                    <!-- Remember Me -->
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center">
-                            <input 
-                                id="remember_me" 
-                                name="remember_me" 
-                                type="checkbox" 
-                                class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                            >
-                            <label for="remember_me" class="ml-2 block text-sm text-gray-700">
-                                Remember me
+                    <form method="POST" action="" class="space-y-6">
+                        <input type="hidden" name="login_type" value="student">
+                        
+                        <!-- Student Number -->
+                        <div>
+                            <label for="student_number" class="block text-sm font-medium text-gray-700 mb-2">
+                                Student Number
                             </label>
+                            <input 
+                                type="text" 
+                                id="student_number" 
+                                name="student_number" 
+                                required 
+                                value="<?php echo htmlspecialchars($_POST['student_number'] ?? ''); ?>"
+                                class="form-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                                placeholder="Enter your student number (e.g., 2024-001)"
+                            >
                         </div>
-                        <div class="text-sm">
-                            <a href="#" class="font-medium text-indigo-600 hover:text-indigo-500">
-                                Forgot your password?
-                            </a>
+
+                        <!-- Submit Button -->
+                        <div>
+                            <button 
+                                type="submit" 
+                                class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+                            >
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
+                                </svg>
+                                Sign In as Student
+                            </button>
                         </div>
-                    </div>
+                    </form>
+                </div>
 
-                    <!-- Submit Button -->
-                    <div>
-                        <button 
-                            type="submit" 
-                            class="btn-login w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                        >
-                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
-                            </svg>
-                            Sign In
-                        </button>
-                    </div>
-                </form>
+                <!-- Staff/Faculty Login Content -->
+                <div id="staffContent" class="tab-content hidden">
+                    <?php if ($loginResult && !$loginResult['success'] && !isset($_POST['student_number'])): ?>
+                        <div class="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                            <div class="flex">
+                                <div class="flex-shrink-0">
+                                    <svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                                    </svg>
+                                </div>
+                                <div class="ml-3">
+                                    <p class="text-sm font-medium"><?php echo htmlspecialchars($loginResult['message']); ?></p>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endif; ?>
 
-                <!-- Additional Info -->
-                <div class="mt-6 text-center">
-                    <p class="text-xs text-gray-500">
-                        Need help? Contact your system administrator
-                    </p>
+                    <form method="POST" action="" class="space-y-6">
+                        <input type="hidden" name="login_type" value="staff">
+                        
+                        <!-- Username -->
+                        <div>
+                            <label for="username" class="block text-sm font-medium text-gray-700 mb-2">
+                                Username
+                            </label>
+                            <input 
+                                type="text" 
+                                id="username" 
+                                name="username" 
+                                required 
+                                value="<?php echo htmlspecialchars($_POST['username'] ?? ''); ?>"
+                                class="form-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500" 
+                                placeholder="Enter your username"
+                            >
+                        </div>
+
+                        <!-- Password -->
+                        <div>
+                            <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
+                                Password
+                            </label>
+                            <input 
+                                type="password" 
+                                id="password" 
+                                name="password" 
+                                required 
+                                class="form-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500" 
+                                placeholder="Enter your password"
+                            >
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div>
+                            <button 
+                                type="submit" 
+                                class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200"
+                            >
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013 3v1"></path>
+                                </svg>
+                                Sign In
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
 
@@ -161,34 +205,69 @@ if ($loginResult && $loginResult['success']) {
     </div>
 
     <script>
-        // Form validation and enhancement
-        document.addEventListener('DOMContentLoaded', function() {
-            const form = document.querySelector('form');
-            const userTypeSelect = document.getElementById('user_type');
-            const usernameInput = document.getElementById('username');
-            const passwordInput = document.getElementById('password');
-
-            // Add loading state to button on form submit
-            form.addEventListener('submit', function(e) {
-                const submitBtn = form.querySelector('button[type="submit"]');
-                submitBtn.innerHTML = `
-                    <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Signing in...
-                `;
-                submitBtn.disabled = true;
+        function switchTab(tabType) {
+            console.log('Switching to tab:', tabType);
+            
+            // Get tab buttons
+            const studentTab = document.getElementById('studentTab');
+            const staffTab = document.getElementById('staffTab');
+            
+            // Get content divs
+            const studentContent = document.getElementById('studentContent');
+            const staffContent = document.getElementById('staffContent');
+            
+            console.log('Elements found:', {
+                studentTab: !!studentTab,
+                staffTab: !!staffTab,
+                studentContent: !!studentContent,
+                staffContent: !!staffContent
             });
-
-            // Auto-focus first empty field
-            if (!userTypeSelect.value) {
-                userTypeSelect.focus();
-            } else if (!usernameInput.value) {
-                usernameInput.focus();
+            
+            if (tabType === 'student') {
+                // Activate student tab
+                studentTab.className = 'flex-1 py-2 px-4 text-sm font-medium text-center rounded-md transition-all duration-200 bg-blue-600 text-white shadow-sm';
+                staffTab.className = 'flex-1 py-2 px-4 text-sm font-medium text-center rounded-md transition-all duration-200 text-gray-600 hover:text-gray-800';
+                
+                // Show student content, hide staff content
+                studentContent.classList.remove('hidden');
+                staffContent.classList.add('hidden');
+                
+                console.log('Student content classes:', studentContent.className);
+                console.log('Staff content classes:', staffContent.className);
+                
+                // Focus on student number input
+                setTimeout(() => {
+                    const studentInput = document.getElementById('student_number');
+                    if (studentInput) studentInput.focus();
+                }, 100);
             } else {
-                passwordInput.focus();
+                // Activate staff tab
+                staffTab.className = 'flex-1 py-2 px-4 text-sm font-medium text-center rounded-md transition-all duration-200 bg-green-600 text-white shadow-sm';
+                studentTab.className = 'flex-1 py-2 px-4 text-sm font-medium text-center rounded-md transition-all duration-200 text-gray-600 hover:text-gray-800';
+                
+                // Show staff content, hide student content
+                staffContent.classList.remove('hidden');
+                studentContent.classList.add('hidden');
+                
+                console.log('Student content classes:', studentContent.className);
+                console.log('Staff content classes:', staffContent.className);
+                
+                // Focus on username input
+                setTimeout(() => {
+                    const usernameInput = document.getElementById('username');
+                    if (usernameInput) usernameInput.focus();
+                }, 100);
             }
+        }
+
+        // Initialize the correct tab based on previous submission
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, initializing tabs...');
+            <?php if (isset($_POST['login_type']) && $_POST['login_type'] === 'staff'): ?>
+                switchTab('staff');
+            <?php else: ?>
+                switchTab('student');
+            <?php endif; ?>
         });
     </script>
 </body>
