@@ -1,0 +1,106 @@
+<?php
+/**
+ * Professor Attendance Page - Lab Management System
+ */
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true || $_SESSION['user_type'] !== 'professor') {
+    header('Location: ../index.php');
+    exit();
+}
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance - Lab Management System</title>
+    <link href="../../css/output.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50">
+    <div class="flex dashboard-layout">
+        <?php include '../components/sidebar.php'; ?>
+        <div class="flex flex-col flex-1 main-content-area">
+            <?php include '../components/header.php'; ?>
+            <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-6">
+                <div class="max-w-7xl mx-auto">
+                    <h1 class="text-2xl font-bold text-gray-900 mb-6">Attendance Management</h1>
+                    <div class="bg-white shadow rounded-lg p-6">
+                        <p class="text-gray-600">Student attendance tracking and management functionality will be implemented here.</p>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebar = document.getElementById('sidebar');
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const sidebarClose = document.getElementById('sidebarClose');
+            const sidebarOverlay = document.getElementById('sidebarOverlay');
+            const mainContent = document.querySelector('.main-content-area');
+            let sidebarOpen = false;
+            function initializeSidebar() {
+                if (window.innerWidth >= 1024) {
+                    sidebar.classList.remove('-translate-x-full');
+                    sidebarOverlay.classList.add('hidden');
+                    mainContent.classList.add('sidebar-open');
+                    mainContent.classList.remove('sidebar-closed');
+                    sidebarOpen = true;
+                } else {
+                    sidebar.classList.add('-translate-x-full');
+                    sidebarOverlay.classList.add('hidden');
+                    mainContent.classList.remove('sidebar-open', 'sidebar-closed');
+                    sidebarOpen = false;
+                }
+            }
+            function toggleSidebar() {
+                if (window.innerWidth >= 1024) {
+                    if (sidebarOpen) {
+                        sidebar.classList.add('-translate-x-full');
+                        mainContent.classList.remove('sidebar-open');
+                        mainContent.classList.add('sidebar-closed');
+                        sidebarOpen = false;
+                    } else {
+                        sidebar.classList.remove('-translate-x-full');
+                        mainContent.classList.remove('sidebar-closed');
+                        mainContent.classList.add('sidebar-open');
+                        sidebarOpen = true;
+                    }
+                    sidebarOverlay.classList.add('hidden');
+                } else {
+                    sidebar.classList.toggle('-translate-x-full');
+                    sidebarOverlay.classList.toggle('hidden');
+                }
+            }
+            function closeSidebar() {
+                sidebar.classList.add('-translate-x-full');
+                sidebarOverlay.classList.add('hidden');
+                if (window.innerWidth >= 1024) {
+                    mainContent.classList.remove('sidebar-open');
+                    mainContent.classList.add('sidebar-closed');
+                    sidebarOpen = false;
+                }
+            }
+            initializeSidebar();
+            sidebarToggle?.addEventListener('click', toggleSidebar);
+            sidebarClose?.addEventListener('click', closeSidebar);
+            sidebarOverlay?.addEventListener('click', closeSidebar);
+            document.addEventListener('click', function(event) {
+                if (window.innerWidth < 1024) {
+                    if (!sidebar.contains(event.target) && !sidebarToggle?.contains(event.target)) {
+                        closeSidebar();
+                    }
+                }
+            });
+            window.addEventListener('resize', function() {
+                initializeSidebar();
+            });
+        });
+    </script>
+</body>
+</html>
