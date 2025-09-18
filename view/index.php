@@ -1,21 +1,32 @@
 <?php
 /**
- * Login Page - Lab Management System
+ * Login Page with SMS 2FA Support - Lab Management System
  */
 
 require_once '../controller/login_controller.php';
 
 $controller = new LoginController();
+$loginResult = null;
 
-// Handle login form submission first
-$loginResult = $controller->handleLogin();
-
-// Handle redirect immediately after successful login
-if ($loginResult && $loginResult['success']) {
-    // Add small delay to ensure session is written
-    usleep(100000); // 0.1 second
-    header('Location: ' . $loginResult['redirect']);
+// Handle AJAX requests
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
+    $loginResult = $controller->handleLogin();
+    header('Content-Type: application/json');
+    echo json_encode($loginResult);
     exit();
+}
+
+// Handle regular form submission (fallback)
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_SERVER['HTTP_X_REQUESTED_WITH'])) {
+    $loginResult = $controller->handleLogin();
+    
+    // If successful and doesn't require 2FA, redirect immediately
+    if ($loginResult && $loginResult['success'] && !isset($loginResult['requires_2fa'])) {
+        header('Location: ' . $loginResult['redirect']);
+        exit();
+    }
+    
+    // If requires 2FA, we'll handle it in the frontend
 }
 
 // Check if user is already logged in (for page loads without form submission)
@@ -96,7 +107,7 @@ $controller->checkExistingLogin();
                         </div>
                     <?php endif; ?>
 
-                    <form method="POST" action="" class="space-y-6">
+                    <form id="studentLoginForm" method="POST" action="" class="space-y-6">
                         <input type="hidden" name="login_type" value="student">
                         
                         <!-- Student Number -->
@@ -147,7 +158,7 @@ $controller->checkExistingLogin();
                         </div>
                     <?php endif; ?>
 
-                    <form method="POST" action="" class="space-y-6">
+                    <form id="staffLoginForm" method="POST" action="" class="space-y-6">
                         <input type="hidden" name="login_type" value="staff">
                         
                         <!-- Username -->
@@ -262,14 +273,151 @@ $controller->checkExistingLogin();
             }
         }
 
-        // Initialize the correct tab based on previous submission
+        // Handle form submissions with AJAX for 2FA support
+        function handleFormSubmission(form, isStudentForm = true) {
+            const formData = new FormData(form);
+            const submitButton = form.querySelector('button[type="submit"]');
+            const originalText = submitButton.textContent;
+            
+            // Show loading state
+            submitButton.disabled = true;
+            submitButton.innerHTML = `
+                <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Signing in...
+            `;
+
+            fetch(window.location.href, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    if (data.requires_2fa) {
+                        // Store 2FA state and redirect to verification page
+                        sessionStorage.setItem('2fa_active', 'true');
+                        showAlert(data.message, 'success');
+                        
+                        setTimeout(() => {
+                            window.location.href = 'verify_2fa.php?email=' + encodeURIComponent(data.email_masked);
+                        }, 1500);
+                    } else {
+                        // Direct login success
+                        showAlert(data.message, 'success');
+                        setTimeout(() => {
+                            window.location.href = data.redirect;
+                        }, 1000);
+                    }
+                } else {
+                    showAlert(data.message, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Login error:', error);
+                showAlert('Network error. Please try again.', 'error');
+            })
+            .finally(() => {
+                // Restore button state
+                submitButton.disabled = false;
+                submitButton.textContent = originalText;
+            });
+        }
+
+        function showAlert(message, type) {
+            // Remove any existing alerts
+            const existingAlert = document.querySelector('.alert-message');
+            if (existingAlert) {
+                existingAlert.remove();
+            }
+
+            // Create alert element
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert-message fixed top-4 right-4 max-w-sm p-4 rounded-lg shadow-lg z-50 transition-all transform translate-x-full';
+            
+            if (type === 'success') {
+                alertDiv.classList.add('bg-green-500', 'text-white');
+            } else {
+                alertDiv.classList.add('bg-red-500', 'text-white');
+            }
+            
+            alertDiv.innerHTML = `
+                <div class="flex items-center">
+                    <span class="flex-1">${message}</span>
+                    <button onclick="this.parentElement.parentElement.remove()" class="ml-2 text-white hover:text-gray-200">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div>
+            `;
+            
+            document.body.appendChild(alertDiv);
+            
+            // Animate in
+            setTimeout(() => {
+                alertDiv.classList.remove('translate-x-full');
+            }, 100);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                if (alertDiv.parentElement) {
+                    alertDiv.classList.add('translate-x-full');
+                    setTimeout(() => {
+                        if (alertDiv.parentElement) {
+                            alertDiv.remove();
+                        }
+                    }, 300);
+                }
+            }, 5000);
+        }
+
+        // Initialize the page
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DOM loaded, initializing tabs...');
+            
+            // Initialize tab based on previous submission or default to student
             <?php if (isset($_POST['login_type']) && $_POST['login_type'] === 'staff'): ?>
                 switchTab('staff');
             <?php else: ?>
                 switchTab('student');
             <?php endif; ?>
+
+            // Handle PHP login result if present
+            <?php if ($loginResult): ?>
+                <?php if ($loginResult['success'] && isset($loginResult['requires_2fa'])): ?>
+                    sessionStorage.setItem('2fa_active', 'true');
+                    showAlert('<?php echo addslashes($loginResult['message']); ?>', 'success');
+                    setTimeout(() => {
+                        window.location.href = 'verify_2fa.php?email=<?php echo urlencode($loginResult['email_masked'] ?? '****@****.com'); ?>';
+                    }, 1500);
+                <?php elseif (!$loginResult['success']): ?>
+                    showAlert('<?php echo addslashes($loginResult['message']); ?>', 'error');
+                <?php endif; ?>
+            <?php endif; ?>
+
+            // Add event listeners to forms
+            const studentForm = document.getElementById('studentLoginForm');
+            const staffForm = document.getElementById('staffLoginForm');
+
+            if (studentForm) {
+                studentForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    handleFormSubmission(this, true);
+                });
+            }
+
+            if (staffForm) {
+                staffForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    handleFormSubmission(this, false);
+                });
+            }
         });
     </script>
 </body>

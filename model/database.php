@@ -72,6 +72,33 @@ class UserAuth {
     }
 
     /**
+     * Get student by student number (for 2FA workflow)
+     * @param string $studentNumber
+     * @return array|false
+     */
+    public function getStudentByNumber($studentNumber) {
+        try {
+            $query = "SELECT * FROM students WHERE student_id = :student_id AND status = 'active'";
+            $stmt = $this->connection->prepare($query);
+            $stmt->bindParam(':student_id', $studentNumber);
+            $stmt->execute();
+
+            $user = $stmt->fetch();
+
+            if ($user) {
+                // Keep password for potential future use but don't expose it
+                $user['user_type'] = 'student';
+                return $user;
+            }
+
+            return false;
+        } catch (PDOException $e) {
+            error_log("Get student error: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
      * Authenticate user login (for staff/faculty)
      * @param string $username
      * @param string $password

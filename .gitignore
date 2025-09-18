@@ -1,0 +1,35 @@
+# Environment files - DO NOT COMMIT
+.env
+.env.*
+
+# SMS Configuration - DO NOT COMMIT
+config/sms_config.php
+
+# Log files
+*.log
+error.log
+
+# Temporary files
+*.tmp
+*.temp
+
+# System files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Node modules (if using npm)
+node_modules/
+
+# Vendor directory (if using Composer)
+vendor/
+
+# Cache directories
+cache/
+tmp/
+temp/
