@@ -20,47 +20,26 @@ class AttendanceService {
             $ipAddress = $ipAddress ?? $_SERVER['REMOTE_ADDR'] ?? 'unknown';
             $userAgent = $userAgent ?? $_SERVER['HTTP_USER_AGENT'] ?? 'unknown';
 
-            // Check if attendance already exists for today
-            $existingStmt = $this->db->getConnection()->prepare("
-                SELECT id, login_time FROM attendance_logs 
-                WHERE student_id = ? AND attendance_date = ?
-            ");
-            $existingStmt->execute([$studentId, $today]);
-            $existing = $existingStmt->fetch(PDO::FETCH_ASSOC);
+            error_log("Attendance Debug - Logging login for student ID: $studentId on $today");
 
-            if ($existing) {
-                // Update existing record with new login time (latest login of the day)
-                $updateStmt = $this->db->getConnection()->prepare("
-                    UPDATE attendance_logs SET 
-                        login_time = CURRENT_TIMESTAMP,
-                        ip_address = ?,
-                        user_agent = ?,
-                        status = 'present',
-                        updated_at = CURRENT_TIMESTAMP
-                    WHERE id = ?
-                ");
-                $updateStmt->execute([$ipAddress, $userAgent, $existing['id']]);
-                
-                return [
-                    'success' => true,
-                    'message' => 'Attendance updated for today',
-                    'type' => 'update',
-                    'previous_login' => $existing['login_time']
-                ];
-            } else {
-                // Create new attendance record
-                $insertStmt = $this->db->getConnection()->prepare("
-                    INSERT INTO attendance_logs (student_id, login_time, ip_address, user_agent, attendance_date, status) 
-                    VALUES (?, CURRENT_TIMESTAMP, ?, ?, ?, 'present')
-                ");
-                $insertStmt->execute([$studentId, $ipAddress, $userAgent, $today]);
-                
-                return [
-                    'success' => true,
-                    'message' => 'Attendance logged successfully',
-                    'type' => 'new'
-                ];
-            }
+            // Always create new attendance record for each login
+            $insertStmt = $this->db->getConnection()->prepare("
+                INSERT INTO attendance_logs (student_id, login_time, ip_address, user_agent, attendance_date, status) 
+                VALUES (?, CURRENT_TIMESTAMP, ?, ?, ?, 'present')
+            ");
+            $insertStmt->execute([$studentId, $ipAddress, $userAgent, $today]);
+            
+            $insertId = $this->db->getConnection()->lastInsertId();
+            
+            error_log("Attendance Debug - Created new attendance log with ID: $insertId");
+            
+            return [
+                'success' => true,
+                'message' => 'New login session recorded',
+                'type' => 'new',
+                'attendance_id' => $insertId,
+                'login_time' => date('Y-m-d H:i:s')
+            ];
 
         } catch (Exception $e) {
             error_log("Attendance Log Error: " . $e->getMessage());
@@ -78,7 +57,9 @@ class AttendanceService {
         try {
             $today = date('Y-m-d');
             
-            // Find today's attendance record
+            error_log("Attendance Debug - Logging logout for student ID: $studentId on $today");
+            
+            // Find the most recent attendance record without logout time for today
             $stmt = $this->db->getConnection()->prepare("
                 SELECT id, login_time FROM attendance_logs 
                 WHERE student_id = ? AND attendance_date = ? AND logout_time IS NULL
@@ -88,6 +69,8 @@ class AttendanceService {
             $record = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if ($record) {
+                error_log("Attendance Debug - Found active session with ID: " . $record['id']);
+                
                 // Calculate session duration
                 $loginTime = new DateTime($record['login_time']);
                 $logoutTime = new DateTime();
@@ -103,13 +86,17 @@ class AttendanceService {
                 ");
                 $updateStmt->execute([$duration, $record['id']]);
 
+                error_log("Attendance Debug - Logout recorded with duration: $duration seconds");
+
                 return [
                     'success' => true,
                     'message' => 'Logout logged successfully',
                     'session_duration' => $duration,
-                    'duration_formatted' => $this->formatDuration($duration)
+                    'duration_formatted' => $this->formatDuration($duration),
+                    'attendance_id' => $record['id']
                 ];
             } else {
+                error_log("Attendance Debug - No active session found for logout");
                 return [
                     'success' => false,
                     'message' => 'No active session found for today'
