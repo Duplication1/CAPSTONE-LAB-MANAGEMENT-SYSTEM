@@ -12,6 +12,7 @@ $navigation_items = [
     'student' => [
         ['name' => 'Dashboard', 'href' => '../student/index.php', 'icon' => 'home', 'active' => true],
         ['name' => 'My Courses', 'href' => '../student/courses.php', 'icon' => 'academic-cap'],
+        ['name' => 'Lab Sessions', 'href' => '../student/sessions.php', 'icon' => 'beaker'],
         ['name' => 'Lab Schedule', 'href' => '../student/schedule.php', 'icon' => 'calendar'],
         ['name' => 'Equipment Booking', 'href' => '../student/equipment.php', 'icon' => 'desktop-computer'],
         ['name' => 'Attendance', 'href' => '../student/attendance.php', 'icon' => 'check-circle'],
