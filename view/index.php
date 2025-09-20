@@ -120,6 +120,7 @@ $controller->checkExistingLogin();
                                 id="student_number" 
                                 name="student_number" 
                                 required 
+                                autocomplete="username"
                                 value="<?php echo htmlspecialchars($_POST['student_number'] ?? ''); ?>"
                                 class="form-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
                                 placeholder="Enter your student number (e.g., 2024-001)"
@@ -171,6 +172,7 @@ $controller->checkExistingLogin();
                                 id="username" 
                                 name="username" 
                                 required 
+                                autocomplete="username"
                                 value="<?php echo htmlspecialchars($_POST['username'] ?? ''); ?>"
                                 class="form-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500" 
                                 placeholder="Enter your username"
@@ -187,6 +189,7 @@ $controller->checkExistingLogin();
                                 id="password" 
                                 name="password" 
                                 required 
+                                autocomplete="current-password"
                                 class="form-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500" 
                                 placeholder="Enter your password"
                             >

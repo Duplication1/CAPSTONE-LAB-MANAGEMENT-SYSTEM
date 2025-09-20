@@ -71,20 +71,23 @@ class AttendanceService {
             if ($record) {
                 error_log("Attendance Debug - Found active session with ID: " . $record['id']);
                 
-                // Calculate session duration
-                $loginTime = new DateTime($record['login_time']);
-                $logoutTime = new DateTime();
-                $duration = $logoutTime->getTimestamp() - $loginTime->getTimestamp();
-
-                // Update logout time and duration
+                // Let MySQL calculate the duration to avoid timezone issues
                 $updateStmt = $this->db->getConnection()->prepare("
                     UPDATE attendance_logs SET 
                         logout_time = CURRENT_TIMESTAMP,
-                        session_duration = ?,
+                        session_duration = TIMESTAMPDIFF(SECOND, login_time, CURRENT_TIMESTAMP),
                         updated_at = CURRENT_TIMESTAMP
                     WHERE id = ?
                 ");
-                $updateStmt->execute([$duration, $record['id']]);
+                $updateStmt->execute([$record['id']]);
+
+                // Get the calculated duration from the database
+                $durationStmt = $this->db->getConnection()->prepare("
+                    SELECT session_duration FROM attendance_logs WHERE id = ?
+                ");
+                $durationStmt->execute([$record['id']]);
+                $updatedRecord = $durationStmt->fetch(PDO::FETCH_ASSOC);
+                $duration = $updatedRecord['session_duration'];
 
                 error_log("Attendance Debug - Logout recorded with duration: $duration seconds");
 
