@@ -362,6 +362,112 @@ class SessionController {
             return false;
         }
     }
+
+    public function getSessionDetails($sessionId) {
+        try {
+            $sql = "SELECT ls.*, lr.room_name, lr.capacity as room_capacity,
+                           COUNT(sa.student_id) as enrolled_students
+                    FROM lab_sessions ls
+                    LEFT JOIN laboratory_rooms lr ON ls.laboratory_room_id = lr.id
+                    LEFT JOIN session_attendance sa ON ls.id = sa.lab_session_id
+                    WHERE ls.id = :sessionId
+                    GROUP BY ls.id, lr.room_name, lr.capacity";
+            
+            $stmt = $this->connection->prepare($sql);
+            $stmt->bindParam(':sessionId', $sessionId, PDO::PARAM_INT);
+            $stmt->execute();
+            
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            error_log("Error getting session details: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function getEnrolledStudents($sessionId) {
+        try {
+            $sql = "SELECT u.id, u.first_name, u.last_name, u.student_id
+                    FROM session_attendance sa
+                    JOIN users u ON sa.student_id = u.id
+                    WHERE sa.lab_session_id = :sessionId
+                    ORDER BY u.last_name, u.first_name";
+            
+            $stmt = $this->connection->prepare($sql);
+            $stmt->bindParam(':sessionId', $sessionId, PDO::PARAM_INT);
+            $stmt->execute();
+            
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            error_log("Error getting enrolled students: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    public function updateSession($sessionId, $sessionName, $startTime, $endTime, $roomId, $maxStudents, $description) {
+        try {
+            // Check if the session can be updated (only scheduled sessions can be edited)
+            $checkSql = "SELECT status FROM lab_sessions WHERE id = :sessionId";
+            $checkStmt = $this->connection->prepare($checkSql);
+            $checkStmt->bindParam(':sessionId', $sessionId, PDO::PARAM_INT);
+            $checkStmt->execute();
+            $session = $checkStmt->fetch(PDO::FETCH_ASSOC);
+            
+            if (!$session) {
+                throw new Exception("Session not found");
+            }
+            
+            if ($session['status'] !== 'scheduled') {
+                throw new Exception("Only scheduled sessions can be edited");
+            }
+            
+            // Check for time conflicts with other sessions in the same room
+            $conflictSql = "SELECT id FROM lab_sessions 
+                           WHERE laboratory_room_id = :roomId 
+                           AND id != :sessionId
+                           AND status IN ('scheduled', 'ongoing')
+                           AND (
+                               (start_time <= :startTime AND end_time > :startTime) OR
+                               (start_time < :endTime AND end_time >= :endTime) OR
+                               (start_time >= :startTime AND end_time <= :endTime)
+                           )";
+            
+            $conflictStmt = $this->connection->prepare($conflictSql);
+            $conflictStmt->bindParam(':roomId', $roomId, PDO::PARAM_INT);
+            $conflictStmt->bindParam(':sessionId', $sessionId, PDO::PARAM_INT);
+            $conflictStmt->bindParam(':startTime', $startTime);
+            $conflictStmt->bindParam(':endTime', $endTime);
+            $conflictStmt->execute();
+            
+            if ($conflictStmt->rowCount() > 0) {
+                throw new Exception("Time conflict with another session in the same room");
+            }
+            
+            // Update the session
+            $sql = "UPDATE lab_sessions 
+                    SET session_name = :sessionName,
+                        start_time = :startTime,
+                        end_time = :endTime,
+                        laboratory_room_id = :roomId,
+                        max_students = :maxStudents,
+                        description = :description
+                    WHERE id = :sessionId";
+            
+            $stmt = $this->connection->prepare($sql);
+            $stmt->bindParam(':sessionName', $sessionName);
+            $stmt->bindParam(':startTime', $startTime);
+            $stmt->bindParam(':endTime', $endTime);
+            $stmt->bindParam(':roomId', $roomId, PDO::PARAM_INT);
+            $stmt->bindParam(':maxStudents', $maxStudents, PDO::PARAM_INT);
+            $stmt->bindParam(':description', $description);
+            $stmt->bindParam(':sessionId', $sessionId, PDO::PARAM_INT);
+            
+            return $stmt->execute();
+            
+        } catch (Exception $e) {
+            error_log("Error updating session: " . $e->getMessage());
+            return false;
+        }
+    }
 }
 
 // Handle POST requests
@@ -443,6 +549,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             break;
 
+        case 'update_session':
+            $sessionId = $_POST['sessionId'] ?? '';
+            $sessionName = $_POST['sessionName'] ?? '';
+            $startTime = $_POST['startTime'] ?? '';
+            $endTime = $_POST['endTime'] ?? '';
+            $room = $_POST['room'] ?? '';
+            $maxStudents = $_POST['maxStudents'] ?? '';
+            $description = $_POST['description'] ?? '';
+            
+            if (!$sessionId || !$sessionName || !$startTime || !$endTime || !$room || !$maxStudents) {
+                echo json_encode(['success' => false, 'message' => 'All required fields must be filled']);
+                break;
+            }
+            
+            $result = $controller->updateSession($sessionId, $sessionName, $startTime, $endTime, $room, $maxStudents, $description);
+            if ($result) {
+                echo json_encode(['success' => true, 'message' => 'Session updated successfully']);
+            } else {
+                echo json_encode(['success' => false, 'message' => 'Failed to update session']);
+            }
+            break;
+
         default:
             echo json_encode(['success' => false, 'message' => 'Invalid action']);
     }
@@ -509,6 +637,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             } else {
                 echo json_encode(['success' => false, 'message' => 'Failed to update session statuses']);
             }
+            break;
+
+        case 'get_session_details':
+            $sessionId = $_GET['sessionId'] ?? '';
+            if (!$sessionId) {
+                echo json_encode(['success' => false, 'message' => 'Session ID is required']);
+                break;
+            }
+            
+            $details = $controller->getSessionDetails($sessionId);
+            if ($details) {
+                echo json_encode(['success' => true, 'data' => $details]);
+            } else {
+                echo json_encode(['success' => false, 'message' => 'Session not found']);
+            }
+            break;
+
+        case 'get_enrolled_students':
+            $sessionId = $_GET['sessionId'] ?? '';
+            if (!$sessionId) {
+                echo json_encode(['success' => false, 'message' => 'Session ID is required']);
+                break;
+            }
+            
+            $students = $controller->getEnrolledStudents($sessionId);
+            echo json_encode(['success' => true, 'data' => $students]);
             break;
 
         default:

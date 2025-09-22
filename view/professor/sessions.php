@@ -435,17 +435,17 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true || $_SESSI
                 });
             }
 
-            // Load upcoming sessions (not today)
+            // Load upcoming sessions (future sessions)
             function loadUpcomingSessions() {
                 fetch('../../controller/session_controller.php?action=get_professor_sessions')
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        // Filter out today's sessions
-                        const today = new Date().toISOString().split('T')[0];
+                        // Filter to show sessions that haven't started yet (including today's future sessions)
+                        const now = new Date();
                         const upcomingSessions = data.sessions.filter(session => {
-                            const sessionDate = session.start_time.split(' ')[0];
-                            return sessionDate > today;
+                            const sessionStart = new Date(session.start_time);
+                            return sessionStart > now && session.status === 'scheduled';
                         });
                         displayUpcomingSessions(upcomingSessions);
                     } else {
@@ -562,14 +562,241 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true || $_SESSI
             };
 
             window.viewSessionDetails = function(sessionId) {
-                // Placeholder for session details view
-                alert('Session details view - to be implemented');
+                // Fetch session details
+                fetch(`../../controller/session_controller.php?action=get_session_details&sessionId=${sessionId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const session = data.data;
+                        displaySessionDetails(session);
+                    } else {
+                        alert('Error: ' + (data.message || 'Failed to load session details'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while loading session details');
+                });
             };
 
             window.editSession = function(sessionId) {
-                // Placeholder for session edit functionality
-                alert('Session edit functionality - to be implemented');
+                // Fetch session details for editing
+                fetch(`../../controller/session_controller.php?action=get_session_details&sessionId=${sessionId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const session = data.data;
+                        populateEditForm(session);
+                        openEditModal();
+                    } else {
+                        alert('Error: ' + (data.message || 'Failed to load session details'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while loading session details');
+                });
             };
+
+            // Modal management functions
+            function displaySessionDetails(session) {
+                const content = document.getElementById('viewSessionContent');
+                const title = document.getElementById('viewModalTitle');
+                
+                title.textContent = session.session_name;
+                
+                content.innerHTML = `
+                    <div class="space-y-6">
+                        <!-- Session Information -->
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <h4 class="text-lg font-semibold text-gray-900 mb-3">Session Information</h4>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-600">Session Name</p>
+                                    <p class="text-sm text-gray-900">${session.session_name}</p>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-600">Status</p>
+                                    <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(session.status)}">
+                                        ${session.status.charAt(0).toUpperCase() + session.status.slice(1)}
+                                    </span>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-600">Start Time</p>
+                                    <p class="text-sm text-gray-900">${formatDateTime(session.start_time)}</p>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-600">End Time</p>
+                                    <p class="text-sm text-gray-900">${formatDateTime(session.end_time)}</p>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-600">Room</p>
+                                    <p class="text-sm text-gray-900">${session.room_name}</p>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-600">Capacity</p>
+                                    <p class="text-sm text-gray-900">${session.enrolled_students || 0}/${session.max_students} students</p>
+                                </div>
+                            </div>
+                            ${session.description ? `
+                                <div class="mt-4">
+                                    <p class="text-sm font-medium text-gray-600">Description</p>
+                                    <p class="text-sm text-gray-900">${session.description}</p>
+                                </div>
+                            ` : ''}
+                        </div>
+
+                        <!-- Enrolled Students -->
+                        <div class="bg-blue-50 p-4 rounded-lg">
+                            <h4 class="text-lg font-semibold text-gray-900 mb-3">Enrolled Students (${session.enrolled_students || 0})</h4>
+                            <div id="enrolledStudentsList" class="space-y-2">
+                                <p class="text-sm text-gray-600">Loading student list...</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                // Load enrolled students
+                loadEnrolledStudents(session.id);
+                
+                // Show modal
+                document.getElementById('viewSessionModal').classList.remove('hidden');
+            }
+
+            function loadEnrolledStudents(sessionId) {
+                fetch(`../../controller/session_controller.php?action=get_enrolled_students&sessionId=${sessionId}`)
+                .then(response => response.json())
+                .then(data => {
+                    const studentsList = document.getElementById('enrolledStudentsList');
+                    if (data.success && data.data.length > 0) {
+                        studentsList.innerHTML = data.data.map(student => `
+                            <div class="flex justify-between items-center py-2 px-3 bg-white rounded border">
+                                <span class="text-sm font-medium">${student.first_name} ${student.last_name}</span>
+                                <span class="text-sm text-gray-600">${student.student_id}</span>
+                            </div>
+                        `).join('');
+                    } else {
+                        studentsList.innerHTML = '<p class="text-sm text-gray-600">No students enrolled yet.</p>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading students:', error);
+                    document.getElementById('enrolledStudentsList').innerHTML = 
+                        '<p class="text-sm text-red-600">Error loading student list.</p>';
+                });
+            }
+
+            function populateEditForm(session) {
+                document.getElementById('editSessionId').value = session.id;
+                document.getElementById('editSessionName').value = session.session_name;
+                document.getElementById('editStartTime').value = formatForInput(session.start_time);
+                document.getElementById('editEndTime').value = formatForInput(session.end_time);
+                document.getElementById('editMaxStudents').value = session.max_students;
+                document.getElementById('editDescription').value = session.description || '';
+                
+                // Load and set room options
+                loadRoomsForEdit(session.laboratory_room_id);
+            }
+
+            function loadRoomsForEdit(selectedRoomId) {
+                fetch('../../controller/session_controller.php?action=get_rooms')
+                .then(response => response.json())
+                .then(data => {
+                    const roomSelect = document.getElementById('editRoom');
+                    roomSelect.innerHTML = '<option value="">Select a room</option>';
+                    
+                    if (data.success) {
+                        data.rooms.forEach(room => {
+                            const option = document.createElement('option');
+                            option.value = room.id;
+                            option.textContent = `${room.room_name} (Capacity: ${room.capacity})`;
+                            if (room.id == selectedRoomId) {
+                                option.selected = true;
+                            }
+                            roomSelect.appendChild(option);
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading rooms:', error);
+                });
+            }
+
+            function openEditModal() {
+                document.getElementById('editSessionModal').classList.remove('hidden');
+            }
+
+            function closeViewModal() {
+                document.getElementById('viewSessionModal').classList.add('hidden');
+            }
+
+            function closeEditModal() {
+                document.getElementById('editSessionModal').classList.add('hidden');
+            }
+
+            // Utility functions
+            function getStatusColor(status) {
+                switch(status) {
+                    case 'scheduled': return 'bg-blue-100 text-blue-800';
+                    case 'ongoing': return 'bg-green-100 text-green-800';
+                    case 'completed': return 'bg-gray-100 text-gray-800';
+                    case 'cancelled': return 'bg-red-100 text-red-800';
+                    default: return 'bg-gray-100 text-gray-800';
+                }
+            }
+
+            function formatDateTime(dateTimeString) {
+                const date = new Date(dateTimeString);
+                return date.toLocaleString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            }
+
+            function formatForInput(dateTimeString) {
+                const date = new Date(dateTimeString);
+                return date.toISOString().slice(0, 16);
+            }
+
+            // Handle edit form submission
+            function handleEditSubmission(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(e.target);
+                const data = Object.fromEntries(formData);
+                
+                // Add action to the data
+                data.action = 'update_session';
+                
+                // Convert to URL encoded format
+                const urlParams = new URLSearchParams(data);
+                
+                fetch('../../controller/session_controller.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: urlParams.toString()
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Session updated successfully!');
+                        closeEditModal();
+                        loadTodaysSessions();
+                        loadUpcomingSessions();
+                    } else {
+                        alert('Error: ' + (data.message || 'Failed to update session'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while updating the session');
+                });
+            }
 
             // Event listeners
             initializeSidebar();
@@ -584,6 +811,12 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true || $_SESSI
             scheduleSessionForm?.addEventListener('submit', handleFormSubmission);
             document.getElementById('labRoom')?.addEventListener('change', updateMaxStudents);
 
+            // View and Edit Modal event listeners
+            document.getElementById('closeViewModalBtn')?.addEventListener('click', closeViewModal);
+            document.getElementById('closeEditModalBtn')?.addEventListener('click', closeEditModal);
+            document.getElementById('cancelEditBtn')?.addEventListener('click', closeEditModal);
+            document.getElementById('editSessionForm')?.addEventListener('submit', handleEditSubmission);
+
             // Close modal on outside click
             scheduleSessionModal?.addEventListener('click', function(e) {
                 if (e.target === scheduleSessionModal) {
@@ -591,10 +824,28 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true || $_SESSI
                 }
             });
 
+            document.getElementById('viewSessionModal')?.addEventListener('click', function(e) {
+                if (e.target === document.getElementById('viewSessionModal')) {
+                    closeViewModal();
+                }
+            });
+
+            document.getElementById('editSessionModal')?.addEventListener('click', function(e) {
+                if (e.target === document.getElementById('editSessionModal')) {
+                    closeEditModal();
+                }
+            });
+
             // Close modal on Escape key
             document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape' && !scheduleSessionModal.classList.contains('hidden')) {
-                    closeModal();
+                if (e.key === 'Escape') {
+                    if (!scheduleSessionModal.classList.contains('hidden')) {
+                        closeModal();
+                    } else if (!document.getElementById('viewSessionModal').classList.contains('hidden')) {
+                        closeViewModal();
+                    } else if (!document.getElementById('editSessionModal').classList.contains('hidden')) {
+                        closeEditModal();
+                    }
                 }
             });
 
@@ -620,5 +871,97 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true || $_SESSI
             }, 30000);
         });
     </script>
+
+    <!-- View Session Details Modal -->
+    <div id="viewSessionModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen px-4">
+            <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-screen overflow-y-auto">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-lg font-semibold text-gray-900" id="viewModalTitle">Session Details</h3>
+                        <button id="closeViewModalBtn" class="text-gray-400 hover:text-gray-600">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="px-6 py-4" id="viewSessionContent">
+                    <!-- Session details will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Session Modal -->
+    <div id="editSessionModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen px-4">
+            <div class="bg-white rounded-lg shadow-xl max-w-lg w-full">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-lg font-semibold text-gray-900">Edit Session</h3>
+                        <button id="closeEditModalBtn" class="text-gray-400 hover:text-gray-600">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <form id="editSessionForm" class="px-6 py-4">
+                    <input type="hidden" id="editSessionId" name="sessionId">
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label for="editSessionName" class="block text-sm font-medium text-gray-700">Session Name</label>
+                            <input type="text" id="editSessionName" name="sessionName" required
+                                   class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label for="editStartTime" class="block text-sm font-medium text-gray-700">Start Time</label>
+                                <input type="datetime-local" id="editStartTime" name="startTime" required
+                                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                            <div>
+                                <label for="editEndTime" class="block text-sm font-medium text-gray-700">End Time</label>
+                                <input type="datetime-local" id="editEndTime" name="endTime" required
+                                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="editRoom" class="block text-sm font-medium text-gray-700">Room</label>
+                            <select id="editRoom" name="room" required
+                                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                <option value="">Select a room</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="editMaxStudents" class="block text-sm font-medium text-gray-700">Maximum Students</label>
+                            <input type="number" id="editMaxStudents" name="maxStudents" min="1" max="30" required
+                                   class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+
+                        <div>
+                            <label for="editDescription" class="block text-sm font-medium text-gray-700">Description</label>
+                            <textarea id="editDescription" name="description" rows="3"
+                                      class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end space-x-3 pt-6">
+                        <button type="button" id="cancelEditBtn" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 border border-gray-300 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                            Cancel
+                        </button>
+                        <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            Update Session
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
