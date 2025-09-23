@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 5.2.1
+-- version 5.0.2
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Sep 18, 2025 at 07:49 AM
--- Server version: 10.4.32-MariaDB
--- PHP Version: 8.2.12
+-- Generation Time: Sep 23, 2025 at 05:42 AM
+-- Server version: 10.4.11-MariaDB
+-- PHP Version: 7.4.6
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -41,7 +41,7 @@ CREATE TABLE `administrators` (
   `status` enum('active','inactive') DEFAULT 'active',
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `administrators`
@@ -70,7 +70,7 @@ CREATE TABLE `attendance_logs` (
   `notes` text DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `attendance_logs`
@@ -102,7 +102,7 @@ CREATE TABLE `email_config` (
   `monthly_limit` int(11) DEFAULT 10000,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -119,7 +119,7 @@ CREATE TABLE `email_logs` (
   `error_message` text DEFAULT NULL,
   `sent_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `delivered_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `email_logs`
@@ -157,7 +157,7 @@ CREATE TABLE `equipment` (
   `warranty_expiry` date DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `equipment`
@@ -169,6 +169,27 @@ INSERT INTO `equipment` (`id`, `equipment_code`, `equipment_name`, `equipment_ty
 (3, 'MON-001', 'Monitor', 'Display', 'Samsung', '24\" LED', NULL, 1, 'available', '2024-01-15', NULL, '2025-09-18 04:49:29', '2025-09-18 04:49:29'),
 (4, 'KB-001', 'Keyboard', 'Input Device', 'Logitech', 'K380', NULL, 1, 'available', '2024-01-15', NULL, '2025-09-18 04:49:29', '2025-09-18 04:49:29'),
 (5, 'MS-001', 'Mouse', 'Input Device', 'Logitech', 'M705', NULL, 1, 'available', '2024-01-15', NULL, '2025-09-18 04:49:29', '2025-09-18 04:49:29');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `hardware_assets`
+--
+
+CREATE TABLE `hardware_assets` (
+  `asset_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `type` varchar(255) DEFAULT NULL,
+  `condition` varchar(50) DEFAULT NULL,
+  `date` date DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `hardware_assets`
+--
+
+INSERT INTO `hardware_assets` (`asset_id`, `name`, `type`, `condition`, `date`) VALUES
+(4, 'Kim Gamot', NULL, 'Under Maintenance', '2025-09-03');
 
 -- --------------------------------------------------------
 
@@ -191,7 +212,7 @@ CREATE TABLE `it_staff` (
   `status` enum('active','inactive','on_leave') DEFAULT 'active',
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `it_staff`
@@ -216,7 +237,7 @@ CREATE TABLE `laboratory_rooms` (
   `status` enum('available','occupied','maintenance','closed') DEFAULT 'available',
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `laboratory_rooms`
@@ -246,7 +267,7 @@ CREATE TABLE `lab_sessions` (
   `description` text DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -269,7 +290,7 @@ CREATE TABLE `professors` (
   `status` enum('active','inactive','on_leave') DEFAULT 'active',
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `professors`
@@ -293,7 +314,28 @@ CREATE TABLE `session_attendance` (
   `check_in_time` timestamp NULL DEFAULT NULL,
   `check_out_time` timestamp NULL DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `software_assets`
+--
+
+CREATE TABLE `software_assets` (
+  `asset_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `license_key` varchar(255) DEFAULT NULL,
+  `date` date DEFAULT NULL,
+  `type` varchar(100) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `software_assets`
+--
+
+INSERT INTO `software_assets` (`asset_id`, `name`, `license_key`, `date`, `type`) VALUES
+(2, 'Kim Gamot', '21312312312', '2025-09-23', NULL);
 
 -- --------------------------------------------------------
 
@@ -316,7 +358,7 @@ CREATE TABLE `students` (
   `status` enum('active','inactive','suspended') DEFAULT 'active',
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `students`
@@ -344,7 +386,7 @@ CREATE TABLE `user_2fa_codes` (
   `max_attempts` int(11) DEFAULT 3,
   `expires_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `user_2fa_codes`
@@ -407,6 +449,12 @@ ALTER TABLE `equipment`
   ADD KEY `laboratory_room_id` (`laboratory_room_id`);
 
 --
+-- Indexes for table `hardware_assets`
+--
+ALTER TABLE `hardware_assets`
+  ADD PRIMARY KEY (`asset_id`);
+
+--
 -- Indexes for table `it_staff`
 --
 ALTER TABLE `it_staff`
@@ -446,6 +494,12 @@ ALTER TABLE `session_attendance`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `unique_attendance` (`lab_session_id`,`student_id`),
   ADD KEY `student_id` (`student_id`);
+
+--
+-- Indexes for table `software_assets`
+--
+ALTER TABLE `software_assets`
+  ADD PRIMARY KEY (`asset_id`);
 
 --
 -- Indexes for table `students`
@@ -500,6 +554,12 @@ ALTER TABLE `equipment`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
+-- AUTO_INCREMENT for table `hardware_assets`
+--
+ALTER TABLE `hardware_assets`
+  MODIFY `asset_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
 -- AUTO_INCREMENT for table `it_staff`
 --
 ALTER TABLE `it_staff`
@@ -528,6 +588,12 @@ ALTER TABLE `professors`
 --
 ALTER TABLE `session_attendance`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `software_assets`
+--
+ALTER TABLE `software_assets`
+  MODIFY `asset_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `students`
