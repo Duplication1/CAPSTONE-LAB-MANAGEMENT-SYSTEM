@@ -1,0 +1,18 @@
+# Lab Computer Names
+# One computer name per line
+# Lines starting with # are comments and will be ignored
+
+LAB-PC-01
+LAB-PC-02  
+LAB-PC-03
+LAB-PC-04
+LAB-PC-05
+LAB-PC-06
+LAB-PC-07
+LAB-PC-08
+LAB-PC-09
+LAB-PC-10
+
+# Additional computers can be added here
+# LAB-PC-11
+# LAB-PC-12
