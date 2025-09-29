@@ -41,12 +41,28 @@ class LoginController {
      */
     private function handleStudentLogin() {
         $studentNumber = trim($_POST['student_number'] ?? '');
+        $labRoom = trim($_POST['lab_room'] ?? '');
+        $pcNumber = trim($_POST['pc_number'] ?? '');
 
         // Validate input
         if (empty($studentNumber)) {
             return [
                 'success' => false,
                 'message' => 'Student number is required.'
+            ];
+        }
+
+        if (empty($labRoom)) {
+            return [
+                'success' => false,
+                'message' => 'Laboratory room selection is required.'
+            ];
+        }
+
+        if (empty($pcNumber)) {
+            return [
+                'success' => false,
+                'message' => 'Computer/PC selection is required.'
             ];
         }
 
@@ -86,6 +102,8 @@ class LoginController {
             $_SESSION['2fa_user_type'] = 'student';
             $_SESSION['2fa_email'] = $user['email'];
             $_SESSION['2fa_expires'] = time() + 600; // 10 minutes
+            $_SESSION['2fa_lab_room'] = $labRoom;
+            $_SESSION['2fa_pc_number'] = $pcNumber;
             
             return [
                 'success' => true,
@@ -228,18 +246,30 @@ class LoginController {
             if ($user) {
                 error_log("Verify2FA Debug - User type: " . $user['user_type']);
                 
+                // Store lab room and PC info before clearing 2FA session
+                $labRoom = $_SESSION['2fa_lab_room'] ?? null;
+                $pcNumber = $_SESSION['2fa_pc_number'] ?? null;
+                
                 // Clear 2FA session data
-                unset($_SESSION['2fa_user_id'], $_SESSION['2fa_user_type'], $_SESSION['2fa_email'], $_SESSION['2fa_expires']);
+                unset($_SESSION['2fa_user_id'], $_SESSION['2fa_user_type'], $_SESSION['2fa_email'], $_SESSION['2fa_expires'], $_SESSION['2fa_lab_room'], $_SESSION['2fa_pc_number']);
                 
                 // Create main session
                 $this->userAuth->createSession($user);
+                
+                // Add lab room and PC information to main session for students
+                if ($user['user_type'] === 'student' && $labRoom && $pcNumber) {
+                    $_SESSION['lab_room'] = $labRoom;
+                    $_SESSION['pc_number'] = $pcNumber;
+                }
                 
                 // Log attendance for students
                 if ($user['user_type'] === 'student') {
                     $attendanceResult = $this->attendanceService->logStudentLogin(
                         $user['id'], 
                         $_SERVER['REMOTE_ADDR'] ?? null, 
-                        $_SERVER['HTTP_USER_AGENT'] ?? null
+                        $_SERVER['HTTP_USER_AGENT'] ?? null,
+                        $labRoom,
+                        $pcNumber
                     );
                 }
                 

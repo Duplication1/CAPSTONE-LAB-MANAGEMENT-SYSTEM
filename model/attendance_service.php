@@ -14,20 +14,20 @@ class AttendanceService {
     /**
      * Log student login attendance automatically
      */
-    public function logStudentLogin($studentId, $ipAddress = null, $userAgent = null) {
+    public function logStudentLogin($studentId, $ipAddress = null, $userAgent = null, $labRoom = null, $pcNumber = null) {
         try {
             $today = date('Y-m-d');
             $ipAddress = $ipAddress ?? $_SERVER['REMOTE_ADDR'] ?? 'unknown';
             $userAgent = $userAgent ?? $_SERVER['HTTP_USER_AGENT'] ?? 'unknown';
 
-            error_log("Attendance Debug - Logging login for student ID: $studentId on $today");
+            error_log("Attendance Debug - Logging login for student ID: $studentId on $today, Lab: $labRoom, PC: $pcNumber");
 
             // Always create new attendance record for each login
             $insertStmt = $this->db->getConnection()->prepare("
-                INSERT INTO attendance_logs (student_id, login_time, ip_address, user_agent, attendance_date, status) 
-                VALUES (?, CURRENT_TIMESTAMP, ?, ?, ?, 'present')
+                INSERT INTO attendance_logs (student_id, login_time, ip_address, user_agent, attendance_date, status, laboratory_room, pc_number) 
+                VALUES (?, CURRENT_TIMESTAMP, ?, ?, ?, 'present', ?, ?)
             ");
-            $insertStmt->execute([$studentId, $ipAddress, $userAgent, $today]);
+            $insertStmt->execute([$studentId, $ipAddress, $userAgent, $today, $labRoom, $pcNumber]);
             
             $insertId = $this->db->getConnection()->lastInsertId();
             
@@ -38,7 +38,9 @@ class AttendanceService {
                 'message' => 'New login session recorded',
                 'type' => 'new',
                 'attendance_id' => $insertId,
-                'login_time' => date('Y-m-d H:i:s')
+                'login_time' => date('Y-m-d H:i:s'),
+                'lab_room' => $labRoom,
+                'pc_number' => $pcNumber
             ];
 
         } catch (Exception $e) {

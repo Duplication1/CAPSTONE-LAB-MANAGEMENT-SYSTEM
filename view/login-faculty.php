@@ -1,63 +1,12 @@
 <?php
 /**
- * Student Login Page - Lab Management System
+ * Faculty/Staff Login Page - Lab Management System
  */
 
 require_once '../controller/login_controller.php';
-require_once '../model/database.php';
 
 $controller = new LoginController();
 $loginResult = null;
-
-// Function to get laboratory rooms from database
-function getLaboratoryRooms() {
-    try {
-        $database = new Database();
-        $connection = $database->getConnection();
-        
-        $query = "SELECT id, room_number, room_name, capacity, status FROM laboratory_rooms WHERE status = 'available' ORDER BY room_number";
-        $stmt = $connection->prepare($query);
-        $stmt->execute();
-        
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    } catch (Exception $e) {
-        error_log("Error fetching laboratory rooms: " . $e->getMessage());
-        return [];
-    }
-}
-
-// Function to get equipment (PCs) for a specific laboratory room via AJAX
-if (isset($_GET['action']) && $_GET['action'] === 'get_equipment' && isset($_GET['room_id'])) {
-    try {
-        $database = new Database();
-        $connection = $database->getConnection();
-        
-        $roomId = intval($_GET['room_id']);
-        $query = "SELECT id, equipment_code, equipment_name FROM equipment 
-                  WHERE laboratory_room_id = :room_id 
-                  AND equipment_type = 'Computer' 
-                  AND status = 'available' 
-                  ORDER BY equipment_code";
-        
-        $stmt = $connection->prepare($query);
-        $stmt->bindParam(':room_id', $roomId, PDO::PARAM_INT);
-        $stmt->execute();
-        
-        $equipment = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        
-        header('Content-Type: application/json');
-        echo json_encode($equipment);
-        exit();
-    } catch (Exception $e) {
-        error_log("Error fetching equipment: " . $e->getMessage());
-        header('Content-Type: application/json');
-        echo json_encode([]);
-        exit();
-    }
-}
-
-// Get laboratory rooms for the dropdown
-$laboratoryRooms = getLaboratoryRooms();
 
 // Handle AJAX requests
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
@@ -89,8 +38,13 @@ $controller->checkExistingLogin();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Login - Lab Management System</title>
+    <title>Faculty/Staff Login - Lab Management System</title>
     <link href="../css/output.css" rel="stylesheet">
+    <style>
+        .hidden {
+            display: none !important;
+        }
+    </style>
 </head>
 <body class="login-container">
     <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
@@ -98,27 +52,27 @@ $controller->checkExistingLogin();
             <!-- Header -->
             <div class="text-center">
                 <div class="mx-auto h-12 w-12 bg-white rounded-full flex items-center justify-center mb-4">
-                    <svg class="h-8 w-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                    <svg class="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
                     </svg>
                 </div>
                 <h2 class="text-3xl font-extrabold text-white">
-                    Student Portal
+                    Faculty & Staff Portal
                 </h2>
                 <p class="mt-2 text-sm text-gray-200">
                     Lab Management System
                 </p>
             </div>
 
-            <!-- Student Login Form -->
+            <!-- Login Form -->
             <div class="bg-white rounded-lg shadow-2xl p-8">
                 <!-- Header -->
                 <div class="mb-6">
-                    <h3 class="text-lg font-medium text-gray-900">Student Login</h3>
+                    <h3 class="text-lg font-medium text-gray-900">Staff/Faculty Login</h3>
                 </div>
 
                 <!-- Error Messages -->
-                <?php if ($loginResult && !$loginResult['success'] && isset($_POST['student_number'])): ?>
+                <?php if ($loginResult && !$loginResult['success']): ?>
                     <div class="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
                         <div class="flex">
                             <div class="flex-shrink-0">
@@ -134,93 +88,86 @@ $controller->checkExistingLogin();
                 <?php endif; ?>
 
                 <!-- Login Form -->
-                <form id="studentLoginForm" method="POST" action="" class="space-y-6">
-                    <input type="hidden" name="login_type" value="student">
+                <form id="staffLoginForm" method="POST" action="" class="space-y-6">
+                    <input type="hidden" name="login_type" value="staff">
                     
-                    <!-- Laboratory Room Selection -->
+                    <!-- Username -->
                     <div>
-                        <label for="lab_room" class="block text-sm font-medium text-gray-700 mb-2">
-                            Laboratory Room
+                        <label for="username" class="block text-sm font-medium text-gray-700 mb-2">
+                            Username
                         </label>
                         <div class="relative">
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                 <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                                 </svg>
                             </div>
-                            <select 
-                                id="lab_room" 
-                                name="lab_room" 
+                            <input 
+                                type="text" 
+                                id="username" 
+                                name="username" 
                                 required 
-                                class="form-select w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+                                autocomplete="username"
+                                value="<?php echo htmlspecialchars($_POST['username'] ?? ''); ?>"
+                                class="form-input w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200" 
+                                placeholder="Enter your username"
                             >
-                                <option value="">Select Laboratory Room</option>
-                                <?php foreach ($laboratoryRooms as $room): ?>
-                                    <option value="<?php echo htmlspecialchars($room['id']); ?>" 
-                                            data-capacity="<?php echo htmlspecialchars($room['capacity']); ?>">
-                                        <?php echo htmlspecialchars($room['room_number']) . ' - ' . htmlspecialchars($room['room_name']); ?>
-                                        (Capacity: <?php echo htmlspecialchars($room['capacity']); ?>)
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
                         </div>
                     </div>
 
-                    <!-- PC Number Selection -->
+                    <!-- Password -->
                     <div>
-                        <label for="pc_number" class="block text-sm font-medium text-gray-700 mb-2">
-                            PC Number
+                        <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
+                            Password
                         </label>
                         <div class="relative">
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                 <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
                                 </svg>
                             </div>
                             <input 
-                                id="pc_number" 
-                                name="pc_number" 
-                                type="text" 
+                                type="password" 
+                                id="password" 
+                                name="password" 
                                 required 
-                                placeholder="Enter PC Number (e.g., PC-01, PC-02)"
-                                class="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
-                            />
+                                autocomplete="current-password"
+                                class="form-input w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200" 
+                                placeholder="Enter your password"
+                            >
                         </div>
                     </div>
-                    <!-- Student Number -->
-                    <div id="student_number_section" style="display: none;">
-                        <label for="student_number" class="block text-sm font-medium text-gray-700 mb-2">
-                            Student Number
-                        </label>
-                        <div class="relative">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V4a2 2 0 114 0v2m-4 0a2 2 0 104 0m-4 0V4a2 2 0 014 0v2"></path>
-                                </svg>
-                            </div>
+
+                    <!-- Remember Me -->
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
                             <input 
-                                type="text" 
-                                id="student_number" 
-                                name="student_number" 
-                                required 
-                                autocomplete="username"
-                                value="<?php echo htmlspecialchars($_POST['student_number'] ?? ''); ?>"
-                                class="form-input w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200" 
-                                placeholder="Enter your student number (e.g., 2024-001)"
+                                id="remember_me" 
+                                name="remember_me" 
+                                type="checkbox" 
+                                class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
                             >
+                            <label for="remember_me" class="ml-2 block text-sm text-gray-700">
+                                Remember me
+                            </label>
+                        </div>
+                        <div class="text-sm">
+                            <a href="#" class="font-medium text-green-600 hover:text-green-500 transition-colors duration-200">
+                                Forgot password?
+                            </a>
                         </div>
                     </div>
 
                     <!-- Submit Button -->
-                    <div id="submit_section" style="display: none;">
+                    <div>
                         <button 
                             type="submit" 
-                            class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200 transform hover:scale-105"
+                            class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200 transform hover:scale-105"
                         >
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
                             </svg>
-                            Sign In as Student
+                            Sign In
                         </button>
                     </div>
                 </form>
@@ -342,41 +289,6 @@ $controller->checkExistingLogin();
 
         // Initialize the page
         document.addEventListener('DOMContentLoaded', function() {
-            // Handle lab room selection
-            const labRoomSelect = document.getElementById('lab_room');
-            const pcNumberInput = document.getElementById('pc_number');
-            const studentNumberSection = document.getElementById('student_number_section');
-            const submitSection = document.getElementById('submit_section');
-
-            labRoomSelect.addEventListener('change', function() {
-                const selectedRoomId = this.value;
-                
-                // Reset PC input and hide subsequent sections
-                pcNumberInput.value = '';
-                studentNumberSection.style.display = 'none';
-                submitSection.style.display = 'none';
-                
-                if (selectedRoomId) {
-                    // Lab room selected, allow PC input
-                    pcNumberInput.disabled = false;
-                    pcNumberInput.focus();
-                } else {
-                    // No lab room selected, disable PC input
-                    pcNumberInput.disabled = true;
-                }
-            });
-
-            // Handle PC number input
-            pcNumberInput.addEventListener('input', function() {
-                if (this.value.trim()) {
-                    studentNumberSection.style.display = 'block';
-                    submitSection.style.display = 'block';
-                } else {
-                    studentNumberSection.style.display = 'none';
-                    submitSection.style.display = 'none';
-                }
-            });
-
             // Handle PHP login result if present
             <?php if ($loginResult): ?>
                 <?php if ($loginResult['success'] && isset($loginResult['requires_2fa'])): ?>
@@ -391,34 +303,18 @@ $controller->checkExistingLogin();
             <?php endif; ?>
 
             // Add event listener to form
-            const studentForm = document.getElementById('studentLoginForm');
-            if (studentForm) {
-                studentForm.addEventListener('submit', function(e) {
+            const staffForm = document.getElementById('staffLoginForm');
+            if (staffForm) {
+                staffForm.addEventListener('submit', function(e) {
                     e.preventDefault();
-                    
-                    // Validate selections
-                    if (!labRoomSelect.value) {
-                        showAlert('Please select a laboratory room.', 'error');
-                        return;
-                    }
-                    
-                    if (!pcNumberInput.value.trim()) {
-                        showAlert('Please enter a PC number.', 'error');
-                        return;
-                    }
-                    
-                    if (!document.getElementById('student_number').value.trim()) {
-                        showAlert('Please enter your student number.', 'error');
-                        return;
-                    }
-                    
                     handleFormSubmission(this);
                 });
             }
 
-            // Focus on lab room selection
-            if (labRoomSelect) {
-                labRoomSelect.focus();
+            // Focus on username input
+            const usernameInput = document.getElementById('username');
+            if (usernameInput) {
+                usernameInput.focus();
             }
         });
     </script>
