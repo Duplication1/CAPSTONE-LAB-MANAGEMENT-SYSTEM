@@ -25,9 +25,12 @@ $user_type_labels = [
 $current_label = $user_type_labels[$user_type] ?? 'Dashboard';
 ?>
 
-<header class="bg-white shadow-lg relative z-30 w-full">
+<header class="bg-white shadow-md w-full h-[109px]">
+     <div class="max-w-[1440px] mx-auto flex items-center justify-between h-full px-10">
+
     <div class="w-full px-4">
         <div class="flex justify-between items-center h-16">
+
             <!-- Left section with menu toggle and title -->
             <div class="flex items-center space-x-4">
                 <!-- Mobile menu toggle button -->
@@ -42,38 +45,36 @@ $current_label = $user_type_labels[$user_type] ?? 'Dashboard';
                 </button>
 
                 <!-- Logo and title -->
-                <div class="flex items-center space-x-3">
-                    <div class="h-8 w-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                        <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                    </div>
-                    <div>
-                        <h1 class="text-xl font-bold text-gray-800">Lab Management System</h1>
-                        <p class="text-xs text-gray-600 hidden sm:block"><?php echo htmlspecialchars($current_label); ?></p>
+                <div class="flex items-center space-x-2">
+                    <div class="flex items-center space-x-2">
+                        <span class="font-poppins font-bold text-[31px] leading-[31px] tracking-normal text-[#504848] inline-flex">
+                        one
+                        <span class="text-red-600">Q</span>
+                        <span class="text-yellow-500">C</span>
+                        <span class="text-blue-600">U</span>
+                        </span>
                     </div>
                 </div>
+                
             </div>
 
             <!-- Right section with user info and logout -->
-            <div class="flex items-center space-x-4">
-                <!-- User information -->
-                <div class="hidden md:flex items-center space-x-3">
-                    <div class="text-right">
-                        <p class="text-sm font-medium text-gray-700"><?php echo htmlspecialchars($user_name); ?></p>
-                        <p class="text-xs text-gray-500 capitalize"><?php echo htmlspecialchars($user_type); ?></p>
-                    </div>
-                    <?php if (!empty($user_id)): ?>
-                        <span class="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded"><?php echo htmlspecialchars($user_id); ?></span>
-                    <?php endif; ?>
-                </div>
+            <div class="flex items-center space-x-6">
 
-                <!-- User avatar placeholder -->
-                <div class="h-8 w-8 bg-gray-300 rounded-full flex items-center justify-center">
-                    <svg class="h-5 w-5 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
-                    </svg>
-                </div>
+            <!-- Notification Bell -->
+            <button class="relative text-blue-600 hover:text-blue-800">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" 
+                    viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                </svg>
+                <span class="absolute top-0 right-0 inline-flex w-2 h-2 bg-red-500 rounded-full"></span>
+            </button>
+
+            <!-- User Avatar -->
+            <div class="h-10 w-10 rounded-full bg-gray-800 text-white flex items-center justify-center font-semibold">
+            JC
+            </div>
 
                 <!-- Logout button -->
                 <a href="../index.php?action=logout" 
