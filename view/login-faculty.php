@@ -46,30 +46,26 @@ $controller->checkExistingLogin();
         }
     </style>
 </head>
-<body class="login-container">
-    <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-        <div class="max-w-md w-full space-y-8">
-            <!-- Header -->
-            <div class="text-center">
-                <div class="mx-auto h-12 w-12 bg-white rounded-full flex items-center justify-center mb-4">
-                    <svg class="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-                    </svg>
-                </div>
-                <h2 class="text-3xl font-extrabold text-white">
-                    Faculty & Staff Portal
-                </h2>
-                <p class="mt-2 text-sm text-gray-200">
-                    Lab Management System
-                </p>
-            </div>
 
-            <!-- Login Form -->
-            <div class="bg-white rounded-lg shadow-2xl p-8">
-                <!-- Header -->
-                <div class="mb-6">
-                    <h3 class="text-lg font-medium text-gray-900">Staff/Faculty Login</h3>
-                </div>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+
+    <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        
+        <div class="max-w-md w-full space-y-8"> 
+
+
+        <!-- Logo -->
+        <div class="flex justify-center mb-6">
+            <div class="h-450px w-450px rounded-full overflow-hidden shadow-md flex items-center justify-center bg-white border border-gray-200">
+                <img src="imgs/QCU Logo.png" alt="QCU Logo" class="h-16 w-16 object-contain">
+            </div>
+        </div>
+
+        <!-- Login Form -->
+        <div class="bg-white rounded-lg shadow-2xl p-8">
+        <!-- Title -->
+        <h1 class="text-2xl font-bold text-center text-gray-900">Welcome</h1>
+            <p class="text-gray-600 text-center mb-8">Please Log in to Continue</p>
 
                 <!-- Error Messages -->
                 <?php if ($loginResult && !$loginResult['success']): ?>
@@ -91,85 +87,60 @@ $controller->checkExistingLogin();
                 <form id="staffLoginForm" method="POST" action="" class="space-y-6">
                     <input type="hidden" name="login_type" value="staff">
                     
-                    <!-- Username -->
+                <!-- Employee Number -->
+                <div class="mb-4">
                     <div>
-                        <label for="username" class="block text-sm font-medium text-gray-700 mb-2">
-                            Username
+                        <label for="username" class="block text-sm font-medium text-gray-900">
+                            Employee number
                         </label>
-                        <div class="relative">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                                </svg>
-                            </div>
-                            <input 
-                                type="text" 
-                                id="username" 
-                                name="username" 
-                                required 
-                                autocomplete="username"
-                                value="<?php echo htmlspecialchars($_POST['username'] ?? ''); ?>"
-                                class="form-input w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200" 
-                                placeholder="Enter your username"
-                            >
-                        </div>
-                    </div>
 
-                    <!-- Password -->
-                    <div>
-                        <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
-                            Password
-                        </label>
-                        <div class="relative">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-                                </svg>
-                            </div>
-                            <input 
-                                type="password" 
-                                id="password" 
-                                name="password" 
-                                required 
-                                autocomplete="current-password"
-                                class="form-input w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200" 
-                                placeholder="Enter your password"
-                            >
-                        </div>
+                        <input 
+                            type="text" 
+                            id="username" 
+                            name="username" 
+                            required 
+                            autocomplete="username"
+                            value="<?php echo htmlspecialchars($_POST['username'] ?? ''); ?>"
+                            class="w-full h-12 px-4 py-3 bg-[#F2F4F8] border border-[#C1C7CD] text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="Enter employee number"
+                        >
                     </div>
+                </div>
 
-                    <!-- Remember Me -->
+                <!-- Password -->
+                <div class="mb-4">
+                    <label for="password" class="block text-sm font-medium text-gray-900">
+                        Password
+                    </label>
+                        <input 
+                            type="password" 
+                            id="password" 
+                            name="password" 
+                            required 
+                            autocomplete="current-password"
+                            class="w-full h-12 px-4 py-3 bg-[#F2F4F8] border border-[#C1C7CD] text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="Enter your password"
+                            >
+
+                        <p class="mt-1 text-xs text-gray-500"> It must be a combination of minimum 8 letters, numbers, and symbols. </p>
+
+                </div>
+
+                    <!-- Remember Me + Forgot -->
                     <div class="flex items-center justify-between">
-                        <div class="flex items-center">
-                            <input 
-                                id="remember_me" 
-                                name="remember_me" 
-                                type="checkbox" 
-                                class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
-                            >
-                            <label for="remember_me" class="ml-2 block text-sm text-gray-700">
-                                Remember me
-                            </label>
-                        </div>
-                        <div class="text-sm">
-                            <a href="#" class="font-medium text-green-600 hover:text-green-500 transition-colors duration-200">
-                                Forgot password?
-                            </a>
-                        </div>
+                        <label class="flex items-center">
+                        <input type="checkbox" name="remember_me" class="mr-2">
+                            <span class="text-sm text-gray-600">Remember me</span>
+                        </label>
+                    <a href="#" class="text-sm text-blue-600 hover:underline">Forgot Password?</a>
                     </div>
 
                     <!-- Submit Button -->
-                    <div>
-                        <button 
-                            type="submit" 
-                            class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200 transform hover:scale-105"
-                        >
-                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
-                            </svg>
-                            Sign In
-                        </button>
-                    </div>
+                    <button type="submit"
+                    class="w-full py-2 rounded-md text-white font-semibold bg-blue-600 hover:bg-blue-700 transition">
+                    Log In
+                    </button>
+
                 </form>
             </div>
 
