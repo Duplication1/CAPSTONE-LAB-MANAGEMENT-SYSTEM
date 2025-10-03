@@ -7,55 +7,69 @@
 // Get current user type from session
 $user_type = $_SESSION['user_type'] ?? 'user';
 
+// Get current page for highlighting
+$current_page = basename($_SERVER['PHP_SELF']);
+$current_dir = basename(dirname($_SERVER['PHP_SELF']));
+
 // Define navigation items for each user type
 $navigation_items = [
     'student' => [
-        ['name' => 'Dashboard', 'href' => '../student/index.php', 'icon' => 'home', 'active' => true],
-        ['name' => 'My Courses', 'href' => '../student/courses.php', 'icon' => 'academic-cap'],
-        ['name' => 'Lab Sessions', 'href' => '../student/sessions.php', 'icon' => 'beaker'],
-        ['name' => 'Lab Schedule', 'href' => '../student/schedule.php', 'icon' => 'calendar'],
-        ['name' => 'Equipment Booking', 'href' => '../student/equipment.php', 'icon' => 'desktop-computer'],
-        ['name' => 'Attendance', 'href' => '../student/attendance.php', 'icon' => 'check-circle'],
-        ['name' => 'Assignments', 'href' => '../student/assignments.php', 'icon' => 'document-text'],
-        ['name' => 'Profile', 'href' => '../student/profile.php', 'icon' => 'user'],
+        ['name' => 'Dashboard', 'href' => '../student/index.php', 'icon' => 'home', 'page' => 'index.php'],
+        ['name' => 'My Courses', 'href' => '../student/courses.php', 'icon' => 'academic-cap', 'page' => 'courses.php'],
+        ['name' => 'Lab Sessions', 'href' => '../student/sessions.php', 'icon' => 'beaker', 'page' => 'sessions.php'],
+        ['name' => 'Lab Schedule', 'href' => '../student/schedule.php', 'icon' => 'calendar', 'page' => 'schedule.php'],
+        ['name' => 'Equipment Booking', 'href' => '../student/equipment.php', 'icon' => 'desktop-computer', 'page' => 'equipment.php'],
+        ['name' => 'Attendance', 'href' => '../student/attendance.php', 'icon' => 'check-circle', 'page' => 'attendance.php'],
+        ['name' => 'Assignments', 'href' => '../student/assignments.php', 'icon' => 'document-text', 'page' => 'assignments.php'],
+        ['name' => 'Profile', 'href' => '../student/profile.php', 'icon' => 'user', 'page' => 'profile.php'],
     ],
     'professor' => [
-        ['name' => 'Dashboard', 'href' => '../professor/index.php', 'icon' => 'home', 'active' => true],
-        ['name' => 'My Classes', 'href' => '../professor/classes.php', 'icon' => 'academic-cap'],
-        ['name' => 'Lab Sessions', 'href' => '../professor/sessions.php', 'icon' => 'beaker'],
-        ['name' => 'Students', 'href' => '../professor/students.php', 'icon' => 'users'],
-        ['name' => 'Schedule', 'href' => '../professor/schedule.php', 'icon' => 'calendar'],
-        ['name' => 'Equipment', 'href' => '../professor/equipment.php', 'icon' => 'desktop-computer'],
-        ['name' => 'Attendance', 'href' => '../professor/attendance.php', 'icon' => 'clipboard-check'],
-        ['name' => 'Reports', 'href' => '../professor/reports.php', 'icon' => 'chart-bar'],
-        ['name' => 'Profile', 'href' => '../professor/profile.php', 'icon' => 'user'],
+        ['name' => 'Dashboard', 'href' => '../professor/index.php', 'icon' => 'home', 'page' => 'index.php'],
+        ['name' => 'My Classes', 'href' => '../professor/classes.php', 'icon' => 'academic-cap', 'page' => 'classes.php'],
+        ['name' => 'Lab Sessions', 'href' => '../professor/sessions.php', 'icon' => 'beaker', 'page' => 'sessions.php'],
+        ['name' => 'Students', 'href' => '../professor/students.php', 'icon' => 'users', 'page' => 'students.php'],
+        ['name' => 'Schedule', 'href' => '../professor/schedule.php', 'icon' => 'calendar', 'page' => 'schedule.php'],
+        ['name' => 'Equipment', 'href' => '../professor/equipment.php', 'icon' => 'desktop-computer', 'page' => 'equipment.php'],
+        ['name' => 'Attendance', 'href' => '../professor/attendance.php', 'icon' => 'clipboard-check', 'page' => 'attendance.php'],
+        ['name' => 'Reports', 'href' => '../professor/reports.php', 'icon' => 'chart-bar', 'page' => 'reports.php'],
+        ['name' => 'Profile', 'href' => '../professor/profile.php', 'icon' => 'user', 'page' => 'profile.php'],
     ],
     'itstaff' => [
-        ['name' => 'Dashboard', 'href' => '../itstaff/index.php', 'icon' => 'home', 'active' => true],
-        ['name' => 'Equipment Management', 'href' => '../itstaff/equipment.php', 'icon' => 'desktop-computer'],
-        ['name' => 'Maintenance Requests', 'href' => '../itstaff/maintenance.php', 'icon' => 'exclamation-triangle'],
-        ['name' => 'Lab Rooms', 'href' => '../itstaff/rooms.php', 'icon' => 'office-building'],
-        ['name' => 'User Management', 'href' => '../itstaff/users.php', 'icon' => 'users'],
-        ['name' => 'System Health', 'href' => '../itstaff/health.php', 'icon' => 'status-online'],
-        ['name' => 'Inventory', 'href' => '../itstaff/inventory.php', 'icon' => 'clipboard-list'],
-        ['name' => 'Reports', 'href' => '../itstaff/reports.php', 'icon' => 'chart-bar'],
-        ['name' => 'Settings', 'href' => '../itstaff/settings.php', 'icon' => 'cog'],
+        ['name' => 'Dashboard', 'href' => '../itstaff/index.php', 'icon' => 'home', 'page' => 'index.php'],
+        ['name' => 'Equipment Management', 'href' => '../itstaff/equipment.php', 'icon' => 'desktop-computer', 'page' => 'equipment.php'],
+        ['name' => 'Maintenance Requests', 'href' => '../itstaff/maintenance.php', 'icon' => 'exclamation-triangle', 'page' => 'maintenance.php'],
+        ['name' => 'Lab Rooms', 'href' => '../itstaff/rooms.php', 'icon' => 'office-building', 'page' => 'rooms.php'],
+        ['name' => 'User Management', 'href' => '../itstaff/users.php', 'icon' => 'users', 'page' => 'users.php'],
+        ['name' => 'System Health', 'href' => '../itstaff/health.php', 'icon' => 'status-online', 'page' => 'health.php'],
+        ['name' => 'Inventory', 'href' => '../itstaff/inventory.php', 'icon' => 'clipboard-list', 'page' => 'inventory.php'],
+        ['name' => 'Reports', 'href' => '../itstaff/reports.php', 'icon' => 'chart-bar', 'page' => 'reports.php'],
+        ['name' => 'Settings', 'href' => '../itstaff/settings.php', 'icon' => 'cog', 'page' => 'settings.php'],
     ],
     'admin' => [
-        ['name' => 'Dashboard', 'href' => '../admin/index.php', 'icon' => 'home', 'active' => true],
-        ['name' => 'User Management', 'href' => '../admin/users.php', 'icon' => 'users'],
-        ['name' => 'Lab Management', 'href' => '../admin/labs.php', 'icon' => 'beaker'],
-        ['name' => 'Equipment', 'href' => '../admin/equipment.php', 'icon' => 'desktop-computer'],
-        ['name' => 'System Health', 'href' => '../admin/health.php', 'icon' => 'heartbeat'],
-        ['name' => 'System Settings', 'href' => '../admin/settings.php', 'icon' => 'cog'],
-        ['name' => 'Database Backup', 'href' => '../admin/backup.php', 'icon' => 'database'],
-        ['name' => 'System Logs', 'href' => '../admin/logs.php', 'icon' => 'document-text'],
-        ['name' => 'Reports', 'href' => '../admin/reports.php', 'icon' => 'chart-bar'],
-        ['name' => 'Permissions', 'href' => '../admin/permissions.php', 'icon' => 'shield-check'],
+        ['name' => 'Dashboard', 'href' => '../admin/index.php', 'icon' => 'home', 'page' => 'index.php'],
+        ['name' => 'User Management', 'href' => '../admin/users.php', 'icon' => 'users', 'page' => 'users.php'],
+        ['name' => 'Lab Management', 'href' => '../admin/labs.php', 'icon' => 'beaker', 'page' => 'labs.php'],
+        ['name' => 'Equipment', 'href' => '../admin/equipment.php', 'icon' => 'desktop-computer', 'page' => 'equipment.php'],
+        ['name' => 'System Health', 'href' => '../admin/health.php', 'icon' => 'heartbeat', 'page' => 'health.php'],
+        ['name' => 'System Settings', 'href' => '../admin/settings.php', 'icon' => 'cog', 'page' => 'settings.php'],
+        ['name' => 'Database Backup', 'href' => '../admin/backup.php', 'icon' => 'database', 'page' => 'backup.php'],
+        ['name' => 'System Logs', 'href' => '../admin/logs.php', 'icon' => 'document-text', 'page' => 'logs.php'],
+        ['name' => 'Reports', 'href' => '../admin/reports.php', 'icon' => 'chart-bar', 'page' => 'reports.php'],
+        ['name' => 'Permissions', 'href' => '../admin/permissions.php', 'icon' => 'shield-check', 'page' => 'permissions.php'],
     ]
 ];
 
 $current_nav = $navigation_items[$user_type] ?? $navigation_items['student'];
+
+// Function to check if current menu item should be active
+function isCurrentPage($item, $current_page, $current_dir, $user_type) {
+    // Check if the page name matches
+    if (isset($item['page']) && $item['page'] === $current_page) {
+        // Also check if we're in the correct directory for this user type
+        return $current_dir === $user_type;
+    }
+    return false;
+}
 
 // SVG icons array
 $icons = [
@@ -97,8 +111,9 @@ $icons = [
     <!-- Navigation -->
     <nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
         <?php foreach ($current_nav as $item): ?>
+            <?php $isActive = isCurrentPage($item, $current_page, $current_dir, $user_type); ?>
             <a href="<?php echo htmlspecialchars($item['href']); ?>" 
-               class="flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200 <?php echo isset($item['active']) && $item['active'] ? 'bg-blue-100 text-blue-700 border-r-2 border-blue-700' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'; ?>">
+               class="flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200 <?php echo $isActive ? 'bg-blue-100 text-blue-700 border-r-2 border-blue-700' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'; ?>">
                 <svg class="mr-3 h-5 w-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <?php echo $icons[$item['icon']] ?? $icons['home']; ?>
                 </svg>

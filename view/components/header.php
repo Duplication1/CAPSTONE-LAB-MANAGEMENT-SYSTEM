@@ -25,7 +25,7 @@ $user_type_labels = [
 $current_label = $user_type_labels[$user_type] ?? 'Dashboard';
 ?>
 
-<header class="bg-white shadow-md w-full h-[109px]">
+<header class="bg-white shadow-md w-full h-[50px]">
      <div class="max-w-[1440px] mx-auto flex items-center justify-between h-full px-10">
 
     <div class="w-full px-4">
